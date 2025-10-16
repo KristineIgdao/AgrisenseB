@@ -7,8 +7,10 @@ from django.utils.crypto import get_random_string
 from .models import PasswordResetOTP
 from .serializers import SensorReadingSerializer, DailySummarySerializer
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -22,8 +24,11 @@ def login_user(request):
     if user is None:
         return Response({'detail': 'Invalid credentials'}, status=401)
 
-    # ✅ Create session (this makes request.session usable for Channels)
     login(request, user)
+
+    # ✅ Generate JWT tokens
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
 
     return Response({
         'message': 'Login successful',
@@ -32,6 +37,7 @@ def login_user(request):
         'first_name': user.first_name,
         'last_name': user.last_name,
         'email': user.email,
+        'token': access_token,
     })
 
 @csrf_exempt

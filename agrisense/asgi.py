@@ -1,17 +1,23 @@
+# agrisense/asgi.py
 import os
-from django.core.asgi import get_asgi_application
+import django
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from channels.sessions import SessionMiddlewareStack
-from agrisense.routing import websocket_urlpatterns
+from django.core.asgi import get_asgi_application
+from agrisense import routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "agrisense.settings")
 
+# Initialize Django *before* importing anything else
+django.setup()
+
+# Now safe to import middleware
+from accounts.middleware import JWTAuthMiddleware
+
+django_asgi_app = get_asgi_application()
+
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": SessionMiddlewareStack(
-        AuthMiddlewareStack(
-            URLRouter(websocket_urlpatterns)
-        )
+    "http": django_asgi_app,
+    "websocket": JWTAuthMiddleware(
+        URLRouter(routing.websocket_urlpatterns)
     ),
 })

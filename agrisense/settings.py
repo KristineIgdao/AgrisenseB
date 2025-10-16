@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'django_celery_beat',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -111,4 +112,24 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 from channels.auth import AuthMiddlewareStack
 from channels.sessions import SessionMiddlewareStack
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+ALLOWED_HOSTS = ["*", "192.168.1.113", "localhost"]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:19006",
+    "http://192.168.1.113:19006",
+    "exp://192.168.1.113:19000",
+]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
